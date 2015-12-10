@@ -28,14 +28,12 @@ class Ciao < Formula
   def install
     ENV.m32 # (otherwise universal binary is being build, despite ciao
             # configure options, due to homebrew's superenv)
-    system "./builder/sh_src/config-sysdep/ciao_sysconf", "--osarch"
     system "./ciao-boot.sh",
            "configure",
            "--instype=global",
            "--with-docs=no",
            "--lpdoc:htmldir=#{prefix}/var/www/ciao",
            "--ciao:install_prefix=#{prefix}"
-    system "cat", "build-boot/eng/ciaoengine/cfg/DARWINx86_64m32/config_sh"
     system "./ciao-boot.sh", "build"
     system "./ciao-boot.sh", "install"
   end
