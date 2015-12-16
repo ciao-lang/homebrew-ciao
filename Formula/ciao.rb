@@ -13,7 +13,6 @@ class Ciao < Formula
 #    sha256 ""
 #  end
 
-  # (32-bit mode)
   head do
     url "https://github.com/ciao-lang/ciao.git"
   end
@@ -25,15 +24,27 @@ class Ciao < Formula
     fails_with :gcc => n
   end
 
+  def options
+    [["--32-bit", "Build 32-bit only."]]
+  end
+
   def install
-    ENV.m32 # (otherwise universal binary is being build, despite ciao
-            # configure options, due to homebrew's superenv)
-    system "./ciao-boot.sh",
-           "configure",
-           "--instype=global",
-           "--with-docs=no",
-           "--lpdoc:htmldir=#{prefix}/var/www/ciao",
-           "--ciao:install_prefix=#{prefix}"
+    args = ["--instype=global",
+            "--with-docs=no",
+            "--lpdoc:htmldir=#{prefix}/var/www/ciao",
+            "--ciao:install_prefix=#{prefix}"]
+
+    # Build in 64 or 32-bit mode
+    # (otherwise universal binary is being build, despite ciao
+    # configure options, due to homebrew's superenv)
+    if MacOS.prefer_64_bit? and not ARGV.build_32_bit?
+      ENV.m64
+    else
+      ENV.m32
+      args << "--core:m32=yes"
+    end
+
+    system "./ciao-boot.sh", "configure", *args
     system "./ciao-boot.sh", "build"
     system "./ciao-boot.sh", "install"
   end
